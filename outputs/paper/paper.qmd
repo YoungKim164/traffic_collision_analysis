@@ -1,0 +1,79 @@
+---
+title: "Analysis of Motor Vehicle Collision in Toronto"
+author: "Youngho Kim"
+date: 2023-02-03
+date-format: long
+abstract-title: "Abstract"
+abstract: Car Accidents are fatal yet common. This paper examines Motor Vehicle Collision (MVC) occurrences and their changes from January, 2014 to June, 2022 in Torronto
+bibliography: references.bib
+format: pdf
+editor: visual
+---
+
+## 1. Introduction
+
+Motor vehicle is one of the essential asset for modern day people. Its capacity and speed allowed faster shipment and displacement in larger scale than anytime before. However, it also created public safety issue in every alley of the city.
+
+In this paper, I used R[@citeR] to analyze data on Motor Vehicle Collision (MVC) from opendatatoronto[@opendatatoronto] using dplyr[@dplyr] and tidyverse[@tidyverse] packages. The purpose of this paper is to get better understanding on how tendency of car accident has changed over a time. The analyzed data contains how many car accident has occured each year within the period of data collection (@fig-type) and focuses on the seriousness of the accidents (\@tbl-serious).
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+#| label: fig-type
+#| fig-cap: "percent of accident type"
+library(opendatatoronto)
+library(dplyr)
+library(tidyverse)
+
+df=read.csv(file = "~/rstudio/traffic_collision_analysis/inputs/data/raw_data.csv")
+INJ_count<-0
+FRT_count<-0
+PD_count<-0
+
+for (x in df[["Injury_Collisions"]]) {
+  if (x=="YES"){
+    INJ_count=INJ_count+1
+  }
+}
+
+for (x in df[["FTR_Collisions"]]) {
+  if (x=="YES"){
+    FRT_count=FRT_count+1
+  }
+}
+
+for (x in df[["PD_Collisions"]]) {
+  if (x=="YES"){
+    PD_count=PD_count+1
+  }
+}
+a<-c("INJ_count", "FRT_count", "PD_count")
+b<-c(INJ_count/553780*100, FRT_count/553780*100, PD_count/553780*100)
+
+x_axis <- data.frame(a, b)
+
+
+ggplot(data=x_axis, aes(x=a, y=b)) + 
+  geom_bar(stat="identity", width = 0.7) +
+  labs(x = "accident case", y = "percentile") + 
+  theme_minimal(base_size = 14) + 
+  ylim(0, 100)
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+{#tbl-serious}
+
+The `echo: false` option disables the printing of code (only output is displayed).

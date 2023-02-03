@@ -2,7 +2,7 @@
 title: "Analysis of Motor Vehicle Collision in Toronto"
 author: "Youngho Kim"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-abstract: "Car Accidents are fatal yet common. This paper examines Motor Vehicle Collision (MVC) occurrences and their changes from January, 2014 to June, 2022 in Toronto."
+abstract: "Car Accidents are fatal yet common. This paper examines Motor Vehicle Collision (MVC) occurrences and their changes from January, 2014 to June, 2022 in Toronto to find the impact it has on our daily lives and to ensure maximum safety"
 format: pdf
 thanks: 'Code and data are available at: https://github.com/YoungKim164/traffic_collision_analysis'
 bibliography: references.bib

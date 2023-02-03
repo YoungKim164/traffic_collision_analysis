@@ -1,38 +1,47 @@
 ---
 title: "Analysis of Motor Vehicle Collision in Toronto"
 author: "Youngho Kim"
-date: 2023-02-03
-date-format: long
-abstract-title: "Abstract"
-abstract: Car Accidents are fatal yet common. This paper examines Motor Vehicle Collision (MVC) occurrences and their changes from January, 2014 to June, 2022 in Torronto
-bibliography: references.bib
+date: "`r format(Sys.time(), '%d %B %Y')`"
+abstract: "Car Accidents are fatal yet common. This paper examines Motor Vehicle Collision (MVC) occurrences and their changes from January, 2014 to June, 2022 in Toronto."
 format: pdf
-editor: visual
+thanks: 'Code and data are available at: https://github.com/YoungKim164/traffic_collision_analysis'
+bibliography: references.bib
 ---
 
-## 1. Introduction
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(opendatatoronto)
+library(dplyr)
+library(tidyverse)
+library(janitor)
+library(data.table)
+library(zoo)
+library(chron)
+library(lubridate)
+Sys.setenv(TZ = "America/Toronto")
+df=read.csv(file = "~/rstudio/traffic_collision_analysis/inputs/data/raw_data.csv")
+```
 
-Motor vehicle is one of the essential asset for modern day people. Its capacity and speed allowed faster shipment and displacement in larger scale than anytime before. However, it also created public safety issue in every alley of the city.
+# 1. Introduction
 
-In this paper, I used R[@citeR] to analyze data on Motor Vehicle Collision (MVC) from opendatatoronto[@opendatatoronto] using dplyr[@dplyr] and tidyverse[@tidyverse] packages. The purpose of this paper is to get better understanding on how tendency of car accident has changed over a time. The analyzed data contains how many car accident has occured each year within the period of data collection (@fig-type) and focuses on the seriousness of the accidents (\@tbl-serious).
+Motor vehicle is one of the essential asset for modern day people. Its capacity and speed allowed faster shipment and displacement in larger scale than anytime before. However, it also created public safety issue in every alley of the city. In this paper, I explore the record of car accidents in the Toronto to learn about some important characteristics of car accidents happening in the Toronto for finding how impactful the car accidents are in our society and how to avoid it.
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+In this paper, I used R[@citeR] to analyze data on Motor Vehicle Collision (MVC) from opendatatoronto[@opendatatoronto] using dplyr[@dplyr] and tidyverse[@tidyverse] packages. The purpose of this paper is to get better understanding on how tendency of car accident has changed over a time. The analyzed data contains changes of number of accidents occured within the period of data collection (@fig-month) and what time it has occured(@fig-time). It also looks at the level of the seriousness of the accidents (@fig-count) to evaluate how much impact the car accidents have in our daily lives.
 
-## Running Code
+# 2. Data
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## 2.1. Overview
+
+To begin the research on the car accidnets in the Toronto and the changes over the years, I utilized the Police Annual Statistical Report on Traffic Collisions data [@policedata] from the Toronto Open Data portal [@opendatatoronto]. The Police Annual Statistical Report is collected and published by the Toronto Police Services and was published on October 11, 2022. The raw data includes 553780 motor vehicel collisions in the Greater Toronto Area, Time and date of the accidents, and the result of the accidents into three categories:Property Damage, Injury, and Fail to Remain. `R` [@citeR], `tidyverse` [@tidyverse], `dplyr` [@dplyr], `janitor`[@janitor], `data.table` [@dtable], `zoo` [@zoo], `chron` [@chron], and `lubridate`[@lubridate] I cleaned and extracted the necessary data from the raw data to start anlaysis.
+
+## 2.2. Analysis
 
 ```{r}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
-#| label: fig-type
-#| fig-cap: "percent of accident type"
-library(opendatatoronto)
-library(dplyr)
-library(tidyverse)
-
-df=read.csv(file = "~/rstudio/traffic_collision_analysis/inputs/data/raw_data.csv")
+#| label: fig-count
+#| fig-cap: "percentage of each categories of accidents"
 INJ_count<-0
 FRT_count<-0
 PD_count<-0
@@ -54,7 +63,7 @@ for (x in df[["PD_Collisions"]]) {
     PD_count=PD_count+1
   }
 }
-a<-c("INJ_count", "FRT_count", "PD_count")
+a<-c("Injury", "Fail to Remain", "Property Damage")
 b<-c(INJ_count/553780*100, FRT_count/553780*100, PD_count/553780*100)
 
 x_axis <- data.frame(a, b)
@@ -67,13 +76,56 @@ ggplot(data=x_axis, aes(x=a, y=b)) +
   ylim(0, 100)
 ```
 
-You can add options to executable code like this
+First, I looked at the three types of the result the Toronto Police Services used to categorize the car accidents. I counted individual categories and grouped them together to visually compare what types of accidents occurs in most frequent occasion. For the intuitive visual comparison, I used `tidyverse`[@tidyverse] to create bar graph comparing each count(@fig-count). Since its purpose is not focused on finding exact number of occurences but to learn the frequancies of each category, the data is represented as percentage instead of actual count.
+
+@fig-count tells that property damage is close to 3/4 of the total accidents and injury is lowest among other categories. It indicates the car accidents doesn't always lead to the life threatening situation in Greater Toronto area. Indeed, according to transportation canada on Canadian Motor Vehicle Traffic Collision Statistics: 2020(@transportcanada) the fatality rate of motovehicle collision has been bellow one percent since 2011 and steadly decreasing over the year. The major reason behind it is the advance of safety technologies on the vehicle. Technologies such as Forward Collision Warning, Lane Departure Warning, Automatic Emergency Braking, and Rearview Video System became common feature in customer vehicles, and more advanced safety systems like vehicle-to-vehicle communication or automated driving are actively researched to ensure roadside safety. Another key reasons of low injury causing accident is the nature of road environment in the Greater Toronto area. Most of the road in the Greater Toronto area has below 80km per hour. With the low speed limit on the side, it is highly unlikely the drivers be able to speed over 80 km per hour since most of the roads are short and narrow urban roads with significant traffics most of the time. A study from IIHS and AAA showed that vehicles crashed at 40mph(64.4kmh) only showed minor intrusions in the cockpit, while vehicles crashed at 50mph(80.5kmh) were resulted noticeable deformation (@highspeed). In summary, most accidents in the Greater Toronto area are tends to end up property damages only without life loss due to the modern safety systems installed in the vehicles and the nature of the Toronto roads that prevents the driver to critically speed up.
 
 ```{r}
-#| echo: false
-2 * 2
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+#| label: fig-month
+#| fig-cap: "number of accidents overtime"
+
+dtparts = as.data.frame(strsplit(df$OccurrenceDate,"T"))
+occurrencedate<-as.Date.character(dtparts[1,])
+month_count<-df %>%
+  group_by(month = lubridate::floor_date(occurrencedate, 'month')) %>% count()
+
+plot(month_count$month, month_count$n, type = "l", col="red", lwd=3, xlab = "Time", ylab = "number of cases", main = "number of accident cases by time period")
 ```
 
-{#tbl-serious}
+To understand the changes of the trends of accidents occurrence, I reorganized the accidents by the month and year when it was happend. R package `data.table`[@dtable] and `lubridate`[@lubridate] were used for the regrouping data in to chronological order by year and month. The reorganized data is ploted into a line graph to visualize the change overtime (@fig-month).
 
-The `echo: false` option disables the printing of code (only output is displayed).
+The most significant sighting here is the large drops on the number of accidents in the begging of 2020. It is the time when the City of Toronto started serious lockdown after the spread of COVID-19. The analysis on traffic during the pandemic by Kouchakzadeh, Mostafa and Bayanouni showed that there was a significant drop on the traffic congestion in GTHA(Greater Toronto hamilton Area) after the COVID-19 lockdown (@torontotraffic). It was hypothesized that number of accident was decreased as the government lockdown impacted the traffic congestion on the road. As the lockdown was eased, the increase on the number of car accident can be found at the end of 2020.
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+#| label: fig-time
+#| fig-cap: "number of accident by time"
+Hour_count<-df %>% group_by(Hour) %>% fill(Hour) %>% count()
+Hour_count[24,1]=24
+ggplot(data=Hour_count, aes(x=Hour,y=n)) + 
+  geom_bar(stat="identity", width = 0.8) +
+  labs(x = "accident hour", y = "cases") + 
+  theme_minimal(base_size = 14) +
+  ylim(0, 50000) +
+  scale_x_continuous(expand=expansion(mult=c(0.01, 0.01)))
+
+```
+
+To have the deeper understanding on when exactly the car accidents happens. I analyzed the accidents by the time it was occured. using 24 hour system, the accidents were grouped by the hour it was happend using the `hour` variables on the raw data. the cleaned data is represented as the bar graph to have simple visual representation of when the accident happened (@Fig-time).
+
+The most significant pick is from 1500 to 1700. It was easy to hypothesize that the reason of this pick was because of the rush hour. However, it is noticiable that the number of accidents from 0700 to 0900, which commonly considered as rush hour as well, are lower than or similar to the number of accidents during the regular day hour. Many factors would have effected this result but it is suspected that the most important factor is the geography of the Toronto. The Toronto has more complex and dense road plan as it gets to the center of the city. However, outer bound has much simpler and wider roads. This makes getting into the city much harder than getting out from the city. As the result the traffic congestion must be worse when people move out from the city than coming in, which cause more accidents.
+
+# 3. Conclusion
+
+The data showed that the critical car accident which cause serious impact on our lives are very unlike to happen especially in the urban area like the Greater Toronto area where vehicles move relatively slowly on most of the roads. It seems the amount of traffic has the most roads are even safer after the COVID-19 but the accidents count is rising back to the previous level. To minimize the risk of accident, the best practice is to avoid traffic. Most accidents were happened During the rush hour.
+
+Even though the traffic is the most important factor, it is hard to say that it is the only important factor. Further research on other data sources like driving habit, damage level of the accidents, weather and other environmental effect, and/or road condition could show us more deeper understanding and different perspectives on this case.
+
+
+
+# 4. References

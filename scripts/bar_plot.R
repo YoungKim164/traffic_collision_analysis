@@ -23,7 +23,8 @@ data
 #################chart1############################
 
 #read data
-df=read.csv(file = "inputs/data/raw_data.csv")
+df<-
+  read_csv(here::here("/inputs/data/raw_data.csv"), show_col_types = FALSE)
 
 
 #count per category
